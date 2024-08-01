@@ -44,22 +44,11 @@ public class UpdateConnectionStatus : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    protected virtual void DebugLog(string debug, bool permanentError = false)
-    {
-        sessionStatus.text += "\n" + debug;
-        if (permanentError)
-        {
-            Debug.LogError(debug);
-        }
-        else
-        {
-            Debug.Log(debug);
-        }
-    }
+    
 
     void OnWillConnect()
     {
-        DebugLog("Starting connection. Please wait...");
+        
     }
 
     #region INetworkRunnerCallbacks
@@ -68,42 +57,37 @@ public class UpdateConnectionStatus : MonoBehaviour, INetworkRunnerCallbacks
 
         audioSource.PlayOneShot(playerJoined);
 
-        if (player == runner.LocalPlayer)
-        {
-            DebugLog("You have joined !");
-        }
-        else
-            DebugLog("A player joined !");
+        
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         audioSource.PlayOneShot(playerLeft);
-        DebugLog("A player left !");
+        
     }
 
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        DebugLog($"Shutdown : { shutdownReason} ", permanentError: true);
+        
         audioSource.PlayOneShot(shutdown);
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
-        DebugLog("Connected to the server");
+        
         audioSource.PlayOneShot(connectedToServer);
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
-        DebugLog($"Disconnected From Server: {runner.SessionInfo} ({reason})", permanentError: true);
+        
         audioSource.PlayOneShot(disconnectedFromServer);
     }
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
-        DebugLog($"Connect Failed : { reason} ", permanentError: true);
+        
         audioSource.PlayOneShot(connectFailed);
     }
     #endregion

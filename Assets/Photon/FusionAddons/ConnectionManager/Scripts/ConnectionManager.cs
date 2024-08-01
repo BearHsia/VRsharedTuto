@@ -2,6 +2,8 @@ using Fusion.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -150,7 +152,7 @@ namespace Fusion.Addons.ConnectionManagerAddon
         {
             // Create the scene manager if it does not exist
             if (sceneManager == null) sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
-            if (onWillConnect != null) onWillConnect.Invoke();
+            DebugLog("Starting connection. Please wait...");
 
             // Start or join (depends on gamemode) a session with a specific name
             var args = new StartGameArgs()
@@ -188,8 +190,23 @@ namespace Fusion.Addons.ConnectionManagerAddon
                 roomName = runner.SessionInfo.Name;
             }
         }
+        
+        
+        public TextMeshProUGUI sessionStatus;
+        protected virtual void DebugLog(string debug, bool permanentError = false)
+        {
+            sessionStatus.text += "\n" + debug;
+            if (permanentError)
+            {
+                Debug.LogError(debug);
+            }
+            else
+            {
+                Debug.Log(debug);
+            }
+        }
 
-#region Player spawn
+        #region Player spawn
         public void OnPlayerJoinedSharedMode(NetworkRunner runner, PlayerRef player)
         {
             if (player == runner.LocalPlayer && userPrefab != null)
@@ -231,6 +248,13 @@ namespace Fusion.Addons.ConnectionManagerAddon
 #region INetworkRunnerCallbacks
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
+            if (player == runner.LocalPlayer)
+            {
+                DebugLog("You have joined !");
+            }
+            else
+                DebugLog("A player joined !");
+
             if (runner.Topology == Topologies.ClientServer)
             {
                 OnPlayerJoinedHostMode(runner, player);
@@ -241,6 +265,7 @@ namespace Fusion.Addons.ConnectionManagerAddon
             }
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) {
+            DebugLog("A player left !");
             if (runner.Topology == Topologies.ClientServer)
             {
                 OnPlayerLeftHostMode(runner, player);
@@ -250,17 +275,21 @@ namespace Fusion.Addons.ConnectionManagerAddon
 
 #region INetworkRunnerCallbacks (debug log only)
         public void OnConnectedToServer(NetworkRunner runner) {
+            DebugLog("Connected to the server");
             Debug.Log("OnConnectedToServer");
 
         }
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
+            DebugLog($"Shutdown : {shutdownReason} ", permanentError: true);
             Debug.Log("Shutdown: " + shutdownReason);
         }
         public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) {
+            DebugLog($"Disconnected From Server: {runner.SessionInfo} ({reason})", permanentError: true);
             Debug.Log("OnDisconnectedFromServer: "+ reason);
         }
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) {
+            DebugLog($"Connect Failed : {reason} ", permanentError: true);
             Debug.Log("OnConnectFailed: " + reason);
         }
 #endregion
